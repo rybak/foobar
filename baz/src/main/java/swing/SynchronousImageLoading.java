@@ -10,7 +10,10 @@ import javax.swing.text.html.StyleSheet;
 import java.awt.*;
 
 /**
- * Demo of a bug in Zulu JDK.
+ * <a href="https://github.com/rybak/foobar/blob/master/baz/src/main/java/swing/SynchronousImageLoading.java">
+ * Available on Github with image.png resource.</a>
+ * <p>
+ * Demo of a bug in JDK 202+.
  * <p>
  * <em>Actual result:</em>
  * <p>
@@ -117,5 +120,4 @@ public class SynchronousImageLoading {
 	public static void main(String... args) {
 		new SynchronousImageLoading().run();
 	}
-
 }
