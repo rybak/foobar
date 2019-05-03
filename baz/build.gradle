@@ -1,0 +1,14 @@
+task myJar(type: Jar, group: 'build') {
+    archivesBaseName = 'demo'
+    from sourceSets.main.output
+    from(sourceSets.main.allSource) {
+        include '**/*.java'
+    }
+    manifest {
+        attributes([
+                'Main-Class'         : 'swing.SynchronousImageLoading',
+                'Specification-Title': 'Swing HTML image loading bug',
+                'Built-By'           : 'Andrei Rybak'
+        ])
+    }
+}
