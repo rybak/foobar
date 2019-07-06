@@ -67,6 +67,10 @@ public final class Viewer {
 			int key = k;
 			initKeyStroke(KeyStroke.getKeyStroke(k, 0), () -> numberReader.consume(key - KeyEvent.VK_0));
 		}
+		for (int k = KeyEvent.VK_NUMPAD0; k <= KeyEvent.VK_NUMPAD9; k++) {
+			int key = k;
+			initKeyStroke(KeyStroke.getKeyStroke(k, 0), () -> numberReader.consume(key - KeyEvent.VK_NUMPAD0));
+		}
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), this::showReadNumber);
 
 		config = Config.readConfig();
