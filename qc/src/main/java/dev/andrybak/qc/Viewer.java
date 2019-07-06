@@ -4,40 +4,247 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
-import java.awt.event.KeyAdapter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.image.ImageObserver;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.*;
 
 /**
  * @author Andrei Rybak
  */
 public final class Viewer {
+	private static final int CACHE_SIZE = 800;
+
 	private final JFrame window = new JFrame("QC viewer");
 	private final Config config;
 
+	private final JPanel content;
+	private final Canvas view;
+	private final Map<Integer, Path> comicFiles;
+	private final ConcurrentNavigableMap<Integer, Image> cache = new ConcurrentSkipListMap<>();
+
+	private final int min = 1;
+	private final int max;
+	private volatile Cursor cursor;
+	private final NumberReader numberReader;
+	private Toolkit t = Toolkit.getDefaultToolkit();
+
 	private Viewer() {
-		window.addKeyListener(new KeyAdapter() {
+		content = new JPanel(new BorderLayout()) {
+//			@Override
+//			protected void paintComponent(Graphics g) {
+//				super.paintComponent(g);
+//				if (currImage == null)
+//					return;
+//			}
+		};
+		view = new Canvas() {
 			@Override
-			public void keyTyped(KeyEvent e) {
-				switch (e.getKeyCode()) {
-					case KeyEvent.VK_ESCAPE:
-						exit();
-						break;
-				}
+			public void paint(Graphics g) {
+				paintCurrImage(g, this);
+				paintNumber(g);
 			}
-		});
+		};
+		content.add(view, BorderLayout.CENTER);
+		numberReader = new NumberReader(this::paintNumber, (byte) 4);
+
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0, true), this::exit);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0, true), this::exit);
+
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0), this::scrollDown);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, InputEvent.SHIFT_DOWN_MASK), this::scrollUp);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), this::prevComic);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), this::nextComic);
+
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.SHIFT_DOWN_MASK), this::prevTenComic);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.SHIFT_DOWN_MASK), this::nextTenComic);
+
+		for (int k = KeyEvent.VK_0; k <= KeyEvent.VK_9; k++) {
+			int key = k;
+			initKeyStroke(KeyStroke.getKeyStroke(k, 0), () -> numberReader.consume(key - KeyEvent.VK_0));
+		}
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), this::showReadNumber);
+
 		config = Config.readConfig();
+		comicFiles = findAll(config);
+		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
+		cursor = new Cursor(max, Position.TOP);
+		presentCurrentComic();
+		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+		executor.scheduleAtFixedRate(this::loadNeighbors, 2, 5, TimeUnit.SECONDS);
 	}
 
+	private void initKeyStroke(KeyStroke nextKeyStroke, Runnable runnable) {
+		Object cmd = new Object();
+		content.getInputMap().put(nextKeyStroke, cmd);
+		content.getActionMap().put(cmd, new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				runnable.run();
+			}
+		});
+	}
+
+	private void presentCurrentComic() {
+		System.out.println("Current comic = #" + cursor);
+		Image img = getCurrImage();
+		view.prepareImage(img, view);
+		repaintView();
+		clearStale();
+		numberReader.reset(cursor.getComicNum());
+	}
+
+	private Image getCurrImage() {
+		int comicNum = cursor.getComicNum();
+		return getImage(comicNum);
+	}
+
+	private Image getImage(int comicNum) {
+		Path imagePath = comicFiles.get(comicNum);
+		return cache.computeIfAbsent(comicNum, k -> {
+			Image img = t.getImage(imagePath.toString());
+			System.out.println("Getting image #" + comicNum + "... Got " + String.valueOf(img));
+			return img;
+		});
+	}
+
+	private void paintNumber() {
+		view.repaint();
+	}
+
+	private void paintNumber(Graphics g) {
+		if (numberReader.getNumber() == 0)
+			return;
+		g.drawString(String.valueOf(numberReader.getNumber()), 10, 20);
+	}
+
+	private void paintCurrImage(Graphics g, ImageObserver imageObserver) {
+		Image currImage = getCurrImage();
+		Rectangle bounds = g.getClipBounds();
+		int iw = currImage.getWidth(imageObserver);
+		final int y;
+		switch (cursor.getPos()) {
+		case TOP:
+			y = 0;
+			break;
+		case BOTTOM:
+			int ih = currImage.getHeight(imageObserver);
+			y = bounds.height - ih;
+			break;
+		default:
+			throw new IllegalStateException("Unhandled value " + cursor.getPos());
+		}
+		g.drawImage(currImage, bounds.x + (bounds.width - iw) / 2, y, imageObserver);
+	}
+
+	private void repaintView() {
+		SwingUtilities.invokeLater(view::repaint);
+	}
+
+	private void clearStale() {
+		if (cache.size() < CACHE_SIZE)
+			return;
+		final int minKeep = cursor.getComicNum() - (CACHE_SIZE / 3);
+		final int maxKeep = cursor.getComicNum() + (CACHE_SIZE / 3);
+		for (int i = cache.firstKey(); i < minKeep; i++)
+			cache.remove(i);
+		for (int i = maxKeep + 1, n = cache.lastKey() + 1; i < n; i++)
+			cache.remove(i);
+	}
+
+	private void loadNeighbors() {
+		try {
+			int comicNum = cursor.getComicNum();
+			int cacheFrom = Math.max(min, comicNum - CACHE_SIZE / 10);
+			int cacheTill = Math.min(comicNum + CACHE_SIZE / 5, this.max);
+			System.out.println("Want to have cache [" + cacheFrom + ", " + cacheTill + "]");
+			int cnt = 0;
+			for (int i = cacheFrom; i <= cacheTill; i++) {
+				if (cache.containsKey(i))
+					continue;
+				getImage(i);
+				cnt++;
+			}
+			reportCacheContent();
+			if (cnt == 0) {
+				System.out.println("Nothing to pre-load. Skip");
+			} else {
+				System.out.println("Loaded " + cnt + " images to cache");
+			}
+		} catch (Throwable t) {
+			System.err.println(String.valueOf(t));
+			throw t;
+		}
+	}
+
+	private void reportCacheContent() {
+		System.out.println("Cache: [" + cache.firstKey() + ", " + cache.lastKey() + "] of " + cache.size());
+	}
+
+
+	private void scrollDown() {
+		cursor = cursor.scrollDown();
+		presentCurrentComic();
+	}
+
+	private void scrollUp() {
+		cursor = cursor.scrollUp();
+		presentCurrentComic();
+	}
+
+	private void nextComic() {
+		cursor = cursor.nextComic();
+		presentCurrentComic();
+	}
+
+	private void prevComic() {
+		cursor = cursor.prevComic();
+		presentCurrentComic();
+	}
+
+	private void nextTenComic() {
+		for (int i = 0; i < 10; i++)
+			cursor = cursor.nextComic();
+		presentCurrentComic();
+	}
+
+	private void prevTenComic() {
+		for (int i = 0; i < 10; i++)
+			cursor = cursor.prevComic();
+		presentCurrentComic();
+	}
+
+	private void showReadNumber() {
+		int comicNum = numberReader.getNumber();
+		if (comicNum < min || comicNum > max)
+			return;
+		cursor = new Cursor(comicNum, Position.TOP);
+		presentCurrentComic();
+	}
+
+
 	private void go() {
+		window.setContentPane(content);
 		window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		window.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		window.setUndecorated(true);
+		window.setSize(800, 600);
+//		window.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//		window.setUndecorated(true);
 		window.setVisible(true);
+		System.out.println(config.getLocation());
 	}
 
 	private void exit() {
@@ -45,26 +252,151 @@ public final class Viewer {
 		System.exit(0);
 	}
 
+	private static Map<Integer, Path> findAll(Config config) {
+		try (Stream<Path> files = Files.walk(Paths.get(config.getLocation()), 2)) {
+			return files
+				.filter(path -> isImageFile(path.getFileName().toString()))
+				.filter(path -> isComicDir(path.getName(path.getNameCount() - 2).toString()))
+				.filter(path -> path.getFileName().toString().length() > 4)
+				.filter(path -> isComicNumber(path.getFileName().toString().substring(0, 4)))
+				.collect(toMap(Viewer::extractComicNumber, Function.identity()));
+		} catch (IOException e) {
+			System.err.println("Could not find location " + config.getLocation());
+			throw new IllegalArgumentException();
+		}
+	}
+
+	private static boolean isComicNumber(String s) {
+		return s.length() == 4 && s.chars().allMatch(Character::isDigit);
+	}
+
+	private static boolean isComicDir(String s) {
+		return s.length() == 2 && s.chars().allMatch(Character::isDigit);
+	}
+
+	private static boolean isImageFile(String filename) {
+		return filename.endsWith(".png") || filename.endsWith(".jpg") || filename.endsWith(".gif");
+	}
+
+	private static int extractComicNumber(Path p) {
+		return Integer.parseInt(p.getFileName().toString().substring(0, 4));
+	}
+
 	public static void main(String[] args) {
 		new Viewer().go();
 	}
 
+	private static class NumberReader {
+		private static final long READ_DELAY = 5000;
+		private final int base;
+		private int x = 0;
+		private Runnable listener;
+		private long lastTimeRead = System.currentTimeMillis();
+
+		NumberReader(Runnable listener, byte digits) {
+			if (digits > 9 || digits < 1)
+				throw new IllegalArgumentException("Digits should be in [1, 9]. Got " + digits);
+			this.listener = listener;
+			int tmp = 1;
+			for (byte i = 0; i < digits; i++)
+				tmp *= 10;
+			base = tmp;
+		}
+
+		int getNumber() {
+			return x;
+		}
+
+		void consume(int digit) {
+			if (lastTimeRead + READ_DELAY < System.currentTimeMillis())
+				x = 0;
+			x *= 10;
+			x += digit;
+			x %= base;
+			listener.run();
+			lastTimeRead = System.currentTimeMillis();
+		}
+
+		void reset(int x) {
+			this.x = x;
+		}
+	}
+
+	private enum Position {
+		TOP, BOTTOM
+	}
+
+	private class Cursor {
+		private final int comicNum;
+		private final Position pos;
+
+		Cursor(int comicNum, Position pos) {
+			this.comicNum = comicNum < min ? max : (comicNum > max ? min : comicNum);
+			this.pos = pos;
+		}
+
+		int getComicNum() {
+			return comicNum;
+		}
+
+		Position getPos() {
+			return pos;
+		}
+
+		Cursor scrollDown() {
+			switch (pos) {
+			case TOP:
+				return new Cursor(comicNum, Position.BOTTOM);
+			case BOTTOM:
+				return new Cursor(comicNum + 1, Position.TOP);
+			default:
+				throw new IllegalStateException("Unhandled value " + pos);
+			}
+		}
+
+		Cursor scrollUp() {
+			switch (pos) {
+			case TOP:
+				return new Cursor(comicNum - 1, Position.BOTTOM);
+			case BOTTOM:
+				return new Cursor(comicNum, Position.TOP);
+			default:
+				throw new IllegalStateException("Unhandled value " + pos);
+			}
+		}
+
+		Cursor nextComic() {
+			return new Cursor(comicNum + 1, Position.TOP);
+		}
+
+		Cursor prevComic() {
+			return new Cursor(comicNum - 1, Position.TOP);
+		}
+
+		@Override
+		public String toString() {
+			return "Cursor{" +
+				"comicNum=" + comicNum +
+				", pos=" + pos +
+				'}';
+		}
+	}
+
 	private static class Config implements Serializable {
-		public static final Gson GSON = new GsonBuilder().create();
+		static final Gson GSON = new GsonBuilder().create();
 		private final String location;
 
 		Config(String location) {
 			this.location = location;
 		}
 
-		public Path getLocation() {
-			return Paths.get(location);
+		String getLocation() {
+			return location;
 		}
 
 		static Config readConfig() {
 			InputStream configStream = Config.class.getClassLoader().getResourceAsStream("viewer.cfg");
-			Config config = GSON.fromJson(new InputStreamReader(configStream), Config.class);
-			return config;
+			return GSON.fromJson(new InputStreamReader(configStream), Config.class);
 		}
 	}
 }
