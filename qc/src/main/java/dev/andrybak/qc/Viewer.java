@@ -9,10 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.ImageObserver;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Serializable;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -374,7 +371,8 @@ public final class Viewer {
 	}
 
 	private static class Config implements Serializable {
-		static final Gson GSON = new GsonBuilder().create();
+		private static final Gson GSON = new GsonBuilder().create();
+		private static final String CONFIG_FILENAME = "viewer.cfg";
 		private final String location;
 
 		Config(String location) {
@@ -386,8 +384,11 @@ public final class Viewer {
 		}
 
 		static Config readConfig() {
-			InputStream configStream = Config.class.getClassLoader().getResourceAsStream("viewer.cfg");
-			return GSON.fromJson(new InputStreamReader(configStream), Config.class);
+			try (InputStream configStream = new FileInputStream(new File(CONFIG_FILENAME))) {
+				return GSON.fromJson(new InputStreamReader(configStream), Config.class);
+			} catch (IOException e) {
+				throw new IllegalStateException("Can not run without a configuration file " + CONFIG_FILENAME);
+			}
 		}
 	}
 }
