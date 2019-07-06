@@ -44,14 +44,7 @@ public final class Viewer {
 	private Toolkit t = Toolkit.getDefaultToolkit();
 
 	private Viewer() {
-		content = new JPanel(new BorderLayout()) {
-//			@Override
-//			protected void paintComponent(Graphics g) {
-//				super.paintComponent(g);
-//				if (currImage == null)
-//					return;
-//			}
-		};
+		content = new JPanel(new BorderLayout());
 		view = new Canvas() {
 			@Override
 			public void paint(Graphics g) {
@@ -240,9 +233,7 @@ public final class Viewer {
 	private void go() {
 		window.setContentPane(content);
 		window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		window.setSize(800, 600);
-//		window.setExtendedState(JFrame.MAXIMIZED_BOTH);
-//		window.setUndecorated(true);
+		window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		window.setVisible(true);
 		System.out.println(config.getLocation());
 	}
