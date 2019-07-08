@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.*;
  */
 public final class Viewer {
 	private static final int CACHE_SIZE = 800;
-	public static final Path CURRENT_COMIC_SAVE_PATH = Paths.get(".current_comic");
+	private static final Path STATE_SAVE_PATH = Paths.get(".qc_viewer_state");
 
 	private final JFrame window = new JFrame("QC viewer");
 	private final Config config;
@@ -81,48 +81,46 @@ public final class Viewer {
 		config = Config.readConfig();
 		comicFiles = findAll(config);
 		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
-		int startingComicNum = readStartingComicNum(this.max);
-		history = new CircularHistory(startingComicNum);
-		presentJump(startingComicNum);
+		history = readState(this.max);
+		presentJump(history.getCurrent());
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(this::loadNeighbors, 2, 5, TimeUnit.SECONDS);
 	}
 
-	private int readStartingComicNum(int defaultValue) {
-		if (!Files.exists(CURRENT_COMIC_SAVE_PATH)) {
-			System.out.println("No saved starting point.");
-			return defaultValue;
+	private CircularHistory readState(int defaultValue) {
+		if (!Files.exists(STATE_SAVE_PATH)) {
+			System.out.println("No saved state.");
+			return new CircularHistory(defaultValue);
 		}
 		try {
-			List<String> lines = Files.readAllLines(CURRENT_COMIC_SAVE_PATH);
+			List<String> lines = Files.readAllLines(STATE_SAVE_PATH);
 			if (lines.isEmpty())
-				return defaultValue;
+				return new CircularHistory(defaultValue);
 			try {
 				int candidate = Integer.parseInt(lines.get(0));
 				if (candidate < min || candidate > max) {
 					System.err.println("Illegal value " + candidate + " was saved.");
 					System.err.println("Allowed interval: [" + min + ", " + max + "].");
-					return defaultValue;
+					return new CircularHistory(defaultValue);
 				}
-				return candidate;
+				return new CircularHistory(candidate);
 			} catch (NumberFormatException e) {
-				System.err.println("Could not read number from string '" + lines.get(0) + "'.");
-				return defaultValue;
+				System.err.println("Could not read state.");
+				return new CircularHistory(defaultValue);
 			}
 		} catch (IOException e) {
-			System.err.println("Could not read " + CURRENT_COMIC_SAVE_PATH);
-			return defaultValue;
+			System.err.println("Could not read " + STATE_SAVE_PATH);
+			return new CircularHistory(defaultValue);
 		}
 	}
 
-	private void saveComicNumber() {
+	private void saveState() {
 		int comicNum = cursor.getComicNum();
 		try {
-			Files.write(CURRENT_COMIC_SAVE_PATH, Collections.singletonList(String.valueOf(comicNum)));
-			System.out.println("Saved current comic number " + comicNum);
+			Files.write(STATE_SAVE_PATH, Collections.singletonList(String.valueOf(comicNum)));
+			System.out.println("Saved state.");
 		} catch (IOException e) {
-			System.err.println("Could not save current comic number" + comicNum +
-				"in '" + CURRENT_COMIC_SAVE_PATH + "'.");
+			System.err.println("Could not save current state in '" + STATE_SAVE_PATH + "'.");
 		}
 	}
 
@@ -308,7 +306,7 @@ public final class Viewer {
 		window.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				saveComicNumber();
+				saveState();
 			}
 		});
 		SwingUtilities.invokeLater(this::repaintView);
@@ -316,7 +314,7 @@ public final class Viewer {
 	}
 
 	private void exit() {
-		saveComicNumber();
+		saveState();
 		window.dispose();
 		System.exit(0);
 	}
