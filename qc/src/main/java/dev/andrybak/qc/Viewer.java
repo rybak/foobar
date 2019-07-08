@@ -79,6 +79,12 @@ public final class Viewer {
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.CTRL_DOWN_MASK), this::historyForward);
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), this::historyAbandon);
 
+		// vim controls
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_J, 0), this::scrollDown);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_K, 0), this::scrollUp);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H, 0), this::historyBack);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0), this::historyForward);
+
 		config = Config.readConfig();
 		comicFiles = findAll(config);
 		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
