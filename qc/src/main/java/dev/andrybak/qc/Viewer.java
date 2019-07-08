@@ -38,6 +38,7 @@ public final class Viewer {
 	private final int max;
 	private volatile Cursor cursor;
 	private final NumberReader numberReader;
+	private final CircularHistory history;
 	private Toolkit t = Toolkit.getDefaultToolkit();
 
 	private Viewer() {
@@ -73,10 +74,15 @@ public final class Viewer {
 		}
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0, true), this::showReadNumber);
 
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.CTRL_DOWN_MASK), this::historyBack);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, InputEvent.CTRL_DOWN_MASK), this::historyForward);
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), this::historyAbandon);
+
 		config = Config.readConfig();
 		comicFiles = findAll(config);
 		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
 		int startingComicNum = readStartingComicNum(this.max);
+		history = new CircularHistory(startingComicNum);
 		presentJump(startingComicNum);
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(this::loadNeighbors, 2, 5, TimeUnit.SECONDS);
@@ -266,6 +272,7 @@ public final class Viewer {
 	}
 
 	private void presentRegularReading() {
+		history.updateCurrent(cursor.getComicNum());
 		presentCurrentComic();
 	}
 
@@ -275,9 +282,21 @@ public final class Viewer {
 		int comicNum = numberReader.getNumber();
 		if (comicNum < min || comicNum > max)
 			return;
+		history.addEntry(comicNum);
 		presentJump(comicNum);
 	}
 
+	private void historyBack() {
+		presentJump(history.prev());
+	}
+
+	private void historyForward() {
+		presentJump(history.next());
+	}
+
+	private void historyAbandon() {
+		presentJump(history.abandonCurrent());
+	}
 
 	private void go() {
 		window.setMinimumSize(new Dimension(640, 480));
