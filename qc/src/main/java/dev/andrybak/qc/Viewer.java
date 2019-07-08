@@ -272,10 +272,13 @@ public final class Viewer {
 
 
 	private void go() {
+		window.setMinimumSize(new Dimension(640, 480));
+		window.setSize(800, 600);
 		window.setContentPane(content);
 		window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		window.setVisible(true);
+		SwingUtilities.invokeLater(this::repaintView);
 		System.out.println(config.getLocation());
 	}
 
