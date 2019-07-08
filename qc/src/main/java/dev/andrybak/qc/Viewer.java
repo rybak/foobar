@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ import static java.util.stream.Collectors.*;
  */
 public final class Viewer {
 	private static final int CACHE_SIZE = 800;
+	public static final Path CURRENT_COMIC_SAVE_PATH = Paths.get(".current_comic");
 
 	private final JFrame window = new JFrame("QC viewer");
 	private final Config config;
@@ -76,11 +78,51 @@ public final class Viewer {
 		config = Config.readConfig();
 		comicFiles = findAll(config);
 		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
-		cursor = new Cursor(max, Position.TOP);
+		int startingComicNum = readStartingComicNum(this.max);
+		cursor = new Cursor(startingComicNum, Position.TOP);
+		Runtime.getRuntime().addShutdownHook(new Thread(this::saveComicNumber));
 		presentCurrentComic();
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(this::loadNeighbors, 2, 5, TimeUnit.SECONDS);
 	}
+
+	private int readStartingComicNum(int defaultValue) {
+		if (!Files.exists(CURRENT_COMIC_SAVE_PATH)) {
+			System.out.println("No saved starting point.");
+			return defaultValue;
+		}
+		try {
+			List<String> lines = Files.readAllLines(CURRENT_COMIC_SAVE_PATH);
+			if (lines.isEmpty())
+				return defaultValue;
+			try {
+				int candidate = Integer.parseInt(lines.get(0));
+				if (candidate < min || candidate > max) {
+					System.err.println("Illegal value " + candidate + " was saved.");
+					System.err.println("Allowed interval: [" + min + ", " + max + "].");
+					return defaultValue;
+				}
+				return candidate;
+			} catch (NumberFormatException e) {
+				System.err.println("Could not read number from string '" + lines.get(0) + "'.");
+				return defaultValue;
+			}
+		} catch (IOException e) {
+			System.err.println("Could not read " + CURRENT_COMIC_SAVE_PATH);
+			return defaultValue;
+		}
+	}
+
+	private void saveComicNumber() {
+		int comicNum = cursor.getComicNum();
+		try {
+			Files.write(CURRENT_COMIC_SAVE_PATH, Collections.singletonList(String.valueOf(comicNum)));
+		} catch (IOException e) {
+			System.err.println("Could not save current comic number" + comicNum +
+				"in '" + CURRENT_COMIC_SAVE_PATH + "'.");
+		}
+	}
+
 
 	private void initKeyStroke(KeyStroke nextKeyStroke, Runnable runnable) {
 		Object cmd = new Object();
