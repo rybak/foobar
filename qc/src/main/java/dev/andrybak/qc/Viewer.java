@@ -194,8 +194,8 @@ public final class Viewer {
 	private void clearStale() {
 		if (cache.size() < CACHE_SIZE)
 			return;
-		final int minKeep = cursor.getComicNum() - (CACHE_SIZE / 3);
-		final int maxKeep = cursor.getComicNum() + (CACHE_SIZE / 3);
+		final int minKeep = cursor.getComicNum() - (CACHE_SIZE / 4);
+		final int maxKeep = cursor.getComicNum() + (CACHE_SIZE / 2);
 		for (int i = cache.firstKey(); i < minKeep; i++)
 			cache.remove(i);
 		for (int i = maxKeep + 1, n = cache.lastKey() + 1; i < n; i++)
@@ -204,10 +204,9 @@ public final class Viewer {
 
 	private void loadNeighbors() {
 		try {
-			int comicNum = cursor.getComicNum();
-			int cacheFrom = Math.max(min, comicNum - CACHE_SIZE / 10);
-			int cacheTill = Math.min(comicNum + CACHE_SIZE / 5, this.max);
-			System.out.println("Want to have cache [" + cacheFrom + ", " + cacheTill + "]");
+			final int comicNum = cursor.getComicNum();
+			final int cacheFrom = Math.max(min, comicNum - CACHE_SIZE / 10);
+			final int cacheTill = Math.min(comicNum + CACHE_SIZE / 2, this.max);
 			int cnt = 0;
 			for (int i = cacheFrom; i <= cacheTill; i++) {
 				if (cache.containsKey(i))
