@@ -215,9 +215,8 @@ public final class Viewer {
 				cnt++;
 			}
 			reportCacheContent();
-			if (cnt == 0) {
-				System.out.println("Nothing to pre-load. Skip");
-			} else {
+			if (cnt != 0) {
+				System.out.println("Want to have cache [" + cacheFrom + ", " + cacheTill + "]");
 				System.out.println("Loaded " + cnt + " images to cache");
 			}
 		} catch (Throwable t) {
