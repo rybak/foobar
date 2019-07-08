@@ -31,12 +31,18 @@ import java.util.List;
  * (insert) another wheel to the spoke of the diagram.
  */
 class CircularHistory {
-	private final List<Integer> delegate = new ArrayList<>();
+	private final List<Integer> delegate;
 	private int cursor;
 
 	CircularHistory(int startingValue) {
+		delegate = new ArrayList<>();
 		delegate.add(startingValue);
 		cursor = 0;
+	}
+
+	private CircularHistory(List<Integer> ints) {
+		delegate = new ArrayList<>(ints);
+		cursor = ints.size() - 1;
 	}
 
 	void addEntry(int newEntry) {
@@ -94,5 +100,18 @@ class CircularHistory {
 	 */
 	int getCurrent() {
 		return delegate.get(cursor);
+	}
+
+	List<Integer> serialize() {
+		List<Integer> res = new ArrayList<>();
+		int n = delegate.size();
+		for (int i = 0; i < n; i++) {
+			res.add(delegate.get((cursor + i + 1) % n));
+		}
+		return res;
+	}
+
+	static CircularHistory deserialize(List<Integer> ints) {
+		return new CircularHistory(ints);
 	}
 }

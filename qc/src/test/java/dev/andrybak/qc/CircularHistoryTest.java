@@ -2,6 +2,8 @@ package dev.andrybak.qc;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -189,5 +191,39 @@ class CircularHistoryTest {
 		assertEquals(12345, h.abandonCurrent());
 		for (int i = 0; i < 10; i++)
 			assertEquals(12345, h.abandonCurrent());
+	}
+
+	@Test
+	void testThatCurrentInTheMiddleIsSerializedLast() {
+		CircularHistory h = new CircularHistory(50);
+		h.addEntry(10);
+		h.addEntry(90);
+		h.addEntry(30);
+		h.prev();
+		h.prev();
+		assertEquals(10, h.getCurrent());
+		assertEquals(Arrays.asList(90, 30, 50, 10), h.serialize());
+	}
+
+	@Test
+	void testThatCurrentInTheEndIsSerializedLast() {
+		CircularHistory h = new CircularHistory(50);
+		h.addEntry(10);
+		h.addEntry(90);
+		h.addEntry(30);
+		assertEquals(30, h.getCurrent());
+		assertEquals(Arrays.asList(50, 10, 90, 30), h.serialize());
+	}
+
+	@Test
+	void testThatDeserializationPutsCursorAtTheEnd() {
+		CircularHistory h = CircularHistory.deserialize(Arrays.asList(50, 40, 30, 60));
+		assertEquals(60, h.getCurrent());
+		assertEquals(30, h.prev());
+		assertEquals(60, h.next());
+		assertEquals(50, h.next());
+		assertEquals(40, h.next());
+		assertEquals(30, h.next());
+		assertEquals(60, h.next());
 	}
 }

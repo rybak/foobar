@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -96,28 +97,38 @@ public final class Viewer {
 			List<String> lines = Files.readAllLines(STATE_SAVE_PATH);
 			if (lines.isEmpty())
 				return new CircularHistory(defaultValue);
-			try {
-				int candidate = Integer.parseInt(lines.get(0));
-				if (candidate < min || candidate > max) {
-					System.err.println("Illegal value " + candidate + " was saved.");
-					System.err.println("Allowed interval: [" + min + ", " + max + "].");
-					return new CircularHistory(defaultValue);
+			List<Integer> tmp = new ArrayList<>();
+			for (String line : lines) {
+				try {
+					int candidate = Integer.parseInt(line);
+					if (candidate < min || candidate > max) {
+						System.err.println("Illegal value " + candidate + " was saved.");
+						System.err.println("Allowed interval: [" + min + ", " + max + "].");
+					} else {
+						tmp.add(candidate);
+					}
+				} catch (NumberFormatException e) {
+					System.err.println("Could not read value: " + sanitize(line));
 				}
-				return new CircularHistory(candidate);
-			} catch (NumberFormatException e) {
-				System.err.println("Could not read state.");
-				return new CircularHistory(defaultValue);
 			}
+			if (tmp.isEmpty())
+				return new CircularHistory(defaultValue);
+			return CircularHistory.deserialize(tmp);
 		} catch (IOException e) {
 			System.err.println("Could not read " + STATE_SAVE_PATH);
 			return new CircularHistory(defaultValue);
 		}
 	}
 
+	private static String sanitize(String s) {
+		if (s.length() < 20)
+			return s;
+		return s.substring(0, 20);
+	}
+
 	private void saveState() {
-		int comicNum = cursor.getComicNum();
 		try {
-			Files.write(STATE_SAVE_PATH, Collections.singletonList(String.valueOf(comicNum)));
+			Files.write(STATE_SAVE_PATH, history.serialize().stream().map(String::valueOf).collect(toList()));
 			System.out.println("Saved state.");
 		} catch (IOException e) {
 			System.err.println("Could not save current state in '" + STATE_SAVE_PATH + "'.");
