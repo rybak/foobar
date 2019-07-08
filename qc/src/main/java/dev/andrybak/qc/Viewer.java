@@ -5,9 +5,7 @@ import com.google.gson.GsonBuilder;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.awt.image.ImageObserver;
 import java.io.*;
 import java.nio.file.Files;
@@ -80,7 +78,6 @@ public final class Viewer {
 		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
 		int startingComicNum = readStartingComicNum(this.max);
 		cursor = new Cursor(startingComicNum, Position.TOP);
-		Runtime.getRuntime().addShutdownHook(new Thread(this::saveComicNumber));
 		presentCurrentComic();
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(this::loadNeighbors, 2, 5, TimeUnit.SECONDS);
@@ -117,6 +114,7 @@ public final class Viewer {
 		int comicNum = cursor.getComicNum();
 		try {
 			Files.write(CURRENT_COMIC_SAVE_PATH, Collections.singletonList(String.valueOf(comicNum)));
+			System.out.println("Saved current comic number " + comicNum);
 		} catch (IOException e) {
 			System.err.println("Could not save current comic number" + comicNum +
 				"in '" + CURRENT_COMIC_SAVE_PATH + "'.");
@@ -278,11 +276,18 @@ public final class Viewer {
 		window.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		window.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		window.setVisible(true);
+		window.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				saveComicNumber();
+			}
+		});
 		SwingUtilities.invokeLater(this::repaintView);
 		System.out.println(config.getLocation());
 	}
 
 	private void exit() {
+		saveComicNumber();
 		window.dispose();
 		System.exit(0);
 	}
