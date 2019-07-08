@@ -77,8 +77,7 @@ public final class Viewer {
 		comicFiles = findAll(config);
 		max = comicFiles.keySet().stream().mapToInt(i -> i).max().orElse(1);
 		int startingComicNum = readStartingComicNum(this.max);
-		cursor = new Cursor(startingComicNum, Position.TOP);
-		presentCurrentComic();
+		presentJump(startingComicNum);
 		ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
 		executor.scheduleAtFixedRate(this::loadNeighbors, 2, 5, TimeUnit.SECONDS);
 	}
@@ -131,6 +130,11 @@ public final class Viewer {
 				runnable.run();
 			}
 		});
+	}
+
+	private void presentJump(int n) {
+		cursor = new Cursor(n);
+		presentCurrentComic();
 	}
 
 	private void presentCurrentComic() {
@@ -227,45 +231,51 @@ public final class Viewer {
 		System.out.println("Cache: [" + cache.firstKey() + ", " + cache.lastKey() + "] of " + cache.size());
 	}
 
+	/* Regular reading movement */
 
 	private void scrollDown() {
 		cursor = cursor.scrollDown();
-		presentCurrentComic();
+		presentRegularReading();
 	}
 
 	private void scrollUp() {
 		cursor = cursor.scrollUp();
-		presentCurrentComic();
+		presentRegularReading();
 	}
 
 	private void nextComic() {
 		cursor = cursor.nextComic();
-		presentCurrentComic();
+		presentRegularReading();
 	}
 
 	private void prevComic() {
 		cursor = cursor.prevComic();
-		presentCurrentComic();
+		presentRegularReading();
 	}
 
 	private void nextTenComic() {
 		for (int i = 0; i < 10; i++)
 			cursor = cursor.nextComic();
-		presentCurrentComic();
+		presentRegularReading();
 	}
 
 	private void prevTenComic() {
 		for (int i = 0; i < 10; i++)
 			cursor = cursor.prevComic();
+		presentRegularReading();
+	}
+
+	private void presentRegularReading() {
 		presentCurrentComic();
 	}
+
+	/* Jumping movement */
 
 	private void showReadNumber() {
 		int comicNum = numberReader.getNumber();
 		if (comicNum < min || comicNum > max)
 			return;
-		cursor = new Cursor(comicNum, Position.TOP);
-		presentCurrentComic();
+		presentJump(comicNum);
 	}
 
 
@@ -369,6 +379,10 @@ public final class Viewer {
 	private class Cursor {
 		private final int comicNum;
 		private final Position pos;
+
+		Cursor(int comicNum) {
+			this(comicNum, Position.TOP);
+		}
 
 		Cursor(int comicNum, Position pos) {
 			this.comicNum = comicNum < min ? max : (comicNum > max ? min : comicNum);
