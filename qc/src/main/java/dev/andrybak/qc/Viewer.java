@@ -237,7 +237,6 @@ public final class Viewer {
 				getImage(i);
 				cnt++;
 			}
-			reportCacheContent();
 			if (cnt != 0) {
 				System.out.println("Want to have cache [" + cacheFrom + ", " + cacheTill + "]");
 				System.out.println("Loaded " + cnt + " images to cache");
@@ -246,10 +245,6 @@ public final class Viewer {
 			System.err.println(String.valueOf(t));
 			throw t;
 		}
-	}
-
-	private void reportCacheContent() {
-		System.out.println("Cache: [" + cache.firstKey() + ", " + cache.lastKey() + "] of " + cache.size());
 	}
 
 	/* Regular reading movement */
