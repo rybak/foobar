@@ -1,9 +1,6 @@
 package ramdom;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Andrei Rybak
@@ -47,6 +44,7 @@ public class PercentDistributionSimulator {
 		checkPercentDistribution(Arrays.asList(33, 67), 10_000);
 		checkPercentDistribution(Arrays.asList(1, 99), 500_000);
 		checkPercentDistribution(Arrays.asList(20, 60, 20), 200_000);
+		checkPercentDistribution(Collections.nCopies(100, 1), 1000_000);
 	}
 
 	private static void checkPercentDistribution(List<Integer> percents, int numberOfExperiments) {
