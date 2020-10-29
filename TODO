@@ -1,0 +1,3 @@
+== QC viewer ==
+* Move cache size to config
+* Reduce log spam of pre-load thread
