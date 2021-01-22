@@ -1,0 +1,7 @@
+import Bar // defined in buildSrc
+
+task barHello() {
+	doLast {
+		Bar.hello()
+	}
+}
