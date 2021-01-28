@@ -3,9 +3,6 @@ package concurrency;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-/**
- * @author Andrei Rybak
- */
 public class FailedCompletableFuture {
 	public static void main(String... args) {
 		CompletableFuture<String> test = CompletableFuture.supplyAsync(() -> {

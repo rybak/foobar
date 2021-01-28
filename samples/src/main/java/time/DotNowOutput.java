@@ -5,9 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
-/**
- * @author Andrei Rybak
- */
 public class DotNowOutput {
 	public static void main(String[] args) {
 		System.out.println(LocalDate.now());

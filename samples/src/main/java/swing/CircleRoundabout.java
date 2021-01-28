@@ -4,9 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author Andrei Rybak
- */
 public class CircleRoundabout {
 	public static void main(String... args) {
 		JFrame mainWindow = new JFrame();

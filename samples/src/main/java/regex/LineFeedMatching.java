@@ -2,9 +2,6 @@ package regex;
 
 import java.util.regex.Pattern;
 
-/**
- * @author Andrei Rybak
- */
 public class LineFeedMatching {
 	public static void main(String... args) {
 		String text = "aaa\nccc";

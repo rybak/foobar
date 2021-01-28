@@ -2,9 +2,6 @@ package serialization;
 
 import java.io.*;
 
-/**
- * @author Andrei Rybak
- */
 public class Main {
 	public static void main(String... args) throws IOException, ClassNotFoundException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();

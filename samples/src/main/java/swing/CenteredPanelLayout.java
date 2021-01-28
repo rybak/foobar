@@ -2,9 +2,6 @@ package swing;
 
 import java.awt.*;
 
-/**
- * @author Andrei Rybak
- */
 class CenteredPanelLayout implements LayoutManager {
 	private final int w;
 	private final int h;

@@ -2,9 +2,6 @@ package ramdom;
 
 import java.util.*;
 
-/**
- * @author Andrei Rybak
- */
 public class PercentDistributionSimulator {
 	private final Random rnd;
 	private final List<Integer> accumulatedPercents = new ArrayList<>();

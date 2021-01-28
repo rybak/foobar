@@ -1,8 +1,5 @@
 import java.util.function.Supplier;
 
-/**
- * @author Andrei Rybak
- */
 public class TernarySupplier {
     public static void main(String[] args) {
         Supplier<String> a = () -> {

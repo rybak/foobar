@@ -5,9 +5,6 @@ import com.google.gson.GsonBuilder;
 
 import java.util.Objects;
 
-/**
- * @author Andrei Rybak
- */
 public class ExtraFieldsDeserialization {
 	public static void main(String... args) {
 		Gson gson = new GsonBuilder().create();

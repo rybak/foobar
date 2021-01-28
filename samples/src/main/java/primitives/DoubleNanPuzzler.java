@@ -1,8 +1,5 @@
 package primitives;
 
-/**
- * @author Andrei Rybak
- */
 public class DoubleNanPuzzler {
     public static void main(String[] args) {
         double x = Double.NaN;

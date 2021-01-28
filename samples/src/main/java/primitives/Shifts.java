@@ -2,9 +2,6 @@ package primitives;
 
 import java.util.Collections;
 
-/**
- * @author Andrei Rybak
- */
 public class Shifts {
 	public static void main(String... args) {
 		printBinary(1 << 28);

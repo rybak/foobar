@@ -1,8 +1,5 @@
 package primitives;
 
-/**
- * @author Andrei Rybak
- */
 public class BooleanCasting {
 	public static void main(String... args) {
 		boolean b = true;

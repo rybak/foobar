@@ -5,9 +5,6 @@ import java.awt.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
-/**
- * @author Andrei Rybak
- */
 public class ColorDemo {
 	public static void main(String... args) {
 		JFrame mainWindow = new JFrame();

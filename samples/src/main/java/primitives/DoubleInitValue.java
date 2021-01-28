@@ -1,8 +1,5 @@
 package primitives;
 
-/**
- * @author Andrei Rybak
- */
 public class DoubleInitValue {
 	double x;
 	int i;

@@ -3,9 +3,6 @@ package serialization;
 import java.io.*;
 import java.util.function.Function;
 
-/**
- * @author Andrei Rybak
- */
 @SuppressWarnings("unchecked")
 public class LambdaSerialization {
 	public static void main(String... args) throws IOException, ClassNotFoundException {

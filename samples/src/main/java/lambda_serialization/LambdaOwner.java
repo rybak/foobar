@@ -3,9 +3,6 @@ package lambda_serialization;
 import java.io.*;
 import java.util.function.Supplier;
 
-/**
- * @author Andrei Rybak
- */
 public class LambdaOwner implements Serializable {
 
     public static final String TEST_FILE = "lambdauser.obj";

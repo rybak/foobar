@@ -2,9 +2,6 @@ package function;
 
 import java.util.function.Function;
 
-/**
- * @author Andrei Rybak
- */
 public abstract class Either<L, R, Z> {
 	private Either() {
 	}

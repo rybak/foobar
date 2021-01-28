@@ -2,9 +2,6 @@ package io;
 
 import java.io.Console;
 
-/**
- * @author Andrei Rybak
- */
 public class ConsoleTest {
 	public static void main(String[] args) {
 		Console console = System.console();

@@ -3,9 +3,6 @@ package concurrency;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * @author Andrei Rybak
- */
 public class Autolock implements AutoCloseable {
 
 	private final Lock lock = new ReentrantLock();

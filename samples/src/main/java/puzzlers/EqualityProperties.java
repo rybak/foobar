@@ -1,8 +1,5 @@
 package puzzlers;
 
-/**
- * @author Andrei Rybak
- */
 public class EqualityProperties {
 	public static boolean isOdd(int i) {
 		return i % 2 == 1;

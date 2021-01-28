@@ -3,9 +3,6 @@ package concurrency;
 import java.util.*;
 import java.util.concurrent.*;
 
-/**
- * @author Andrei Rybak
- */
 public class ConcurrentMapTest {
 	public static void main(String... args) throws InterruptedException, ExecutionException {
 		Random r = new Random(System.currentTimeMillis());

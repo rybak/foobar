@@ -5,9 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * @author Andrei Rybak
- */
 public class NioPath {
     public static void main(String[] args) {
         Path simple = Paths.get("foobar.iml");

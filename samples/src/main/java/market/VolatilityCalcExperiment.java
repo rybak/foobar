@@ -6,9 +6,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-/**
- * @author Andrei Rybak
- */
 public class VolatilityCalcExperiment {
     private static final int SYMBOL_COUNT = 3;
     private static final int RECORDS_COUNT = 1000;

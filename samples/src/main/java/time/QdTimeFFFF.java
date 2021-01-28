@@ -1,8 +1,5 @@
 package time;
 
-/**
- * @author Andrei Rybak
- */
 public class QdTimeFFFF {
 	public static void main(String[] args) {
 		System.out.println(0xFfffffffffffffffL );

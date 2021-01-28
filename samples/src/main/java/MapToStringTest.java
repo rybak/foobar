@@ -2,9 +2,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * @author Andrei Rybak
- */
 public class MapToStringTest {
     public static void main(String[] args) {
         Map<String, String> config = new HashMap<>();

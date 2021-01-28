@@ -4,9 +4,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-/**
- * @author Andrei Rybak
- */
 public class WeekYear {
 	public static void main(String... args) {
 		DateTimeFormatter januaryFirstBased = DateTimeFormatter.ofPattern("yyyy");
