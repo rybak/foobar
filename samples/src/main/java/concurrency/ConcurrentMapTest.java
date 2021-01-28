@@ -31,7 +31,8 @@ public class ConcurrentMapTest {
 		executorService.shutdown();
 		executorService.awaitTermination(2, TimeUnit.SECONDS);
 		System.out.println("Getting...");
-		for (Future<String> future : futures) future.get();
+		for (Future<String> future : futures)
+			future.get();
 		System.out.println("Asserting...");
 		for (Map.Entry<Long, String> longs : m.entrySet()) {
 			long x = longs.getKey();

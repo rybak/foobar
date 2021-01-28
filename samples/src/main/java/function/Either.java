@@ -50,7 +50,7 @@ public abstract class Either<L, R, Z> {
 		}
 	}
 
-	public static class Zzzzzz<L, R, Z>extends Either<L, R, Z> {
+	public static class Zzzzzz<L, R, Z> extends Either<L, R, Z> {
 
 
 		private final Z z;

@@ -4,15 +4,15 @@ import java.io.Serializable;
 import java.util.function.Supplier;
 
 public class LambdaUser implements Serializable {
-    private final int i;
-    private final Supplier<String> lambda;
+	private final int i;
+	private final Supplier<String> lambda;
 
-    public LambdaUser(int i, Supplier<String> lambda) {
-        this.i = i;
-        this.lambda = lambda;
-    }
+	public LambdaUser(int i, Supplier<String> lambda) {
+		this.i = i;
+		this.lambda = lambda;
+	}
 
-    public String getContent() {
-        return String.valueOf(i) + lambda.get();
-    }
+	public String getContent() {
+		return String.valueOf(i) + lambda.get();
+	}
 }
