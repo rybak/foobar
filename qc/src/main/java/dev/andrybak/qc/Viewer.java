@@ -2,6 +2,7 @@ package dev.andrybak.qc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import dev.andrybak.qc.os.UrlOpener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,7 +16,6 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.*;
@@ -84,6 +84,9 @@ public final class Viewer {
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_K, 0), this::scrollUp);
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H, 0), this::historyBack);
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0), this::historyForward);
+
+		// browser
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_O, 0), this::openCurrentInBrowser);
 
 		config = Config.readConfig();
 		comicFiles = findAll(config);
@@ -306,6 +309,11 @@ public final class Viewer {
 
 	private void historyAbandon() {
 		presentJump(history.abandonCurrent());
+	}
+
+	private void openCurrentInBrowser() {
+		String url = "https://questionablecontent.net/" + history.getCurrent();
+		UrlOpener.openUrl(url);
 	}
 
 	private void go() {

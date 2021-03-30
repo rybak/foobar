@@ -95,9 +95,6 @@ class CircularHistory {
 		return prev();
 	}
 
-	/**
-	 * only for testing
-	 */
 	int getCurrent() {
 		return delegate.get(cursor);
 	}
