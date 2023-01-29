@@ -2,6 +2,9 @@ package idea;
 
 import java.util.function.Function;
 
+/**
+ * Demo for <a href="https://youtrack.jetbrains.com/issue/IDEA-311827">IDEA-311827</a>.
+ */
 class IncompatibleEqualityConstraintDemo {
 	static class Foo<A, B> {
 		<R> void foo(Function<A, R> a, Function<B, R> b) {
