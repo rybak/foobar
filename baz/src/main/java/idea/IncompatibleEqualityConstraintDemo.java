@@ -3,6 +3,16 @@ package idea;
 import java.util.function.Function;
 
 class IncompatibleEqualityConstraintDemo {
+	static class Foo<A, B> {
+		<R> void foo(Function<A, R> a, Function<B, R> b) {
+		}
+	}
+
+	static class FooCorrected<A, B> {
+		<R> void foo(Function<? super A, R> a, Function<? super B, R> b) {
+		}
+	}
+
 	static void bar() {
 		Foo<String, Integer> fooStringInteger = new Foo<>();
 		FooCorrected<String, Integer> fooCorrected = new FooCorrected<>();
@@ -24,16 +34,6 @@ class IncompatibleEqualityConstraintDemo {
 
 			// compiles because Number satisfies constraint `? super Integer`
 			fooCorrected.foo(s -> "Good function" + s, badFunctionB);
-		}
-	}
-
-	static class Foo<A, B> {
-		<R> void foo(Function<A, R> a, Function<B, R> b) {
-		}
-	}
-
-	static class FooCorrected<A, B> {
-		<R> void foo(Function<? super A, R> a, Function<? super B, R> b) {
 		}
 	}
 }
