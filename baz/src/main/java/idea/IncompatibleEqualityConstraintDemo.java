@@ -20,20 +20,20 @@ class IncompatibleEqualityConstraintDemo {
 			Function<CharSequence, String> badFunctionA = cs -> "badFunctionA" + cs.toString();
 
 			// doesn't compile because CharSequence != String
-			fooStringInteger.foo(badFunctionA, i -> "Good function" + i.toString());
+			fooStringInteger.foo(badFunctionA, (Integer i) -> "Good function" + i.toString());
 
 			// compiles because CharSequence satisfies constraint `? super String`
-			fooCorrected.foo(badFunctionA, i -> "Good function" + i.toString());
+			fooCorrected.foo(badFunctionA, (Integer i) -> "Good function" + i.toString());
 		}
 		{
 			// Integer extends Number
 			Function<Number, String> badFunctionB = n -> n.toString() + "g";
 
 			// doesn't compile because Number != Integer
-			fooStringInteger.foo(s -> "Good function" + s, badFunctionB);
+			fooStringInteger.foo((String s) -> "Good function" + s, badFunctionB);
 
 			// compiles because Number satisfies constraint `? super Integer`
-			fooCorrected.foo(s -> "Good function" + s, badFunctionB);
+			fooCorrected.foo((String s) -> "Good function" + s, badFunctionB);
 		}
 	}
 }
