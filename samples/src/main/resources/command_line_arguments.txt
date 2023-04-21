@@ -1,0 +1,9 @@
+-cp samples/build/classes/java/main
+command_line_interface.CommandLineArgumentFile
+first argument
+regular argument
+1234
+argument with a comment# comment should be excluded
+"argument with number sign # inside it"
+'second argument with # in it'
+last argument
