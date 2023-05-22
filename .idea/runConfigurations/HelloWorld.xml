@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="HelloWorld" type="Application" factoryName="Application" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="hello.world.HelloWorld" />
+    <module name="foobar.baz.main" />
+    <extension name="coverage">
+      <pattern>
+        <option name="PATTERN" value="hello.world.*" />
+        <option name="ENABLED" value="true" />
+      </pattern>
+    </extension>
+    <method v="2">
+      <option name="Make" enabled="true" />
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_Hello World" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="build" externalProjectPath="$PROJECT_DIR$/baz" vmOptions="" scriptParameters="" />
+    </method>
+  </configuration>
+</component>
