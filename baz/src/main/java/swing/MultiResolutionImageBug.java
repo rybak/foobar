@@ -12,15 +12,29 @@ import java.util.Objects;
 
 /**
  * Tested on:
- * - Linux:
- * - Java 11.0.19         ❌ Fail
- * - Java 17.0.7          ❌ Fail
- * - Java 19.0.2          ❌ Fail
- * - Java 20.0.1-testing  ❌ Fail
- * - Windows:
- * -
- * - macOS:
- * -
+ * <ul>
+ *     <li>
+ *         Linux:
+ *         <ul>
+ *             <li>Java 11.0.19         ❌ Fail</li>
+ *             <li>Java 17.0.7          ❌ Fail</li>
+ *             <li>Java 19.0.2          ❌ Fail</li>
+ *             <li>Java 20.0.1-testing  ❌ Fail</li>
+ *         </ul>
+ *     </li>
+ *     <li>
+ *         Windows:
+ *         <ul>
+ *             <li>11.0.17  ✅ Success</li>
+ *             <li>15.0.2   ✅ Success</li>
+ *             <li>18.0.2.1 ✅ Success</li>
+ *         </ul>
+ *     </li>
+ *     <li>
+ *         macOS: not applicable, because JFrame's icons aren't rendered there.
+ *         Instead, only {@link Taskbar#setIconImage} is rendered in the Dock.
+ *     </li>
+ * </ul>
  */
 public class MultiResolutionImageBug {
 	public static final String ICON_64 = "icon64x64.png";
@@ -65,7 +79,9 @@ public class MultiResolutionImageBug {
 
 	private void go() {
 		attemptsCounter = 0;
-		mainWindow = new JFrame("Bug demo on Java version " + System.getProperty("java.version"));
+		String windowTitle = "Bug demo on Java version " + System.getProperty("java.version");
+		System.out.println(windowTitle);
+		mainWindow = new JFrame(windowTitle);
 		mainWindow.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		JPanel contentPane = new JPanel(new GridLayout(3, 1));
 		mainWindow.setContentPane(contentPane);
