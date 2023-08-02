@@ -12,3 +12,7 @@ task myJar(type: Jar, group: 'build') {
         ])
     }
 }
+
+java {
+    withJavadocJar()
+}
