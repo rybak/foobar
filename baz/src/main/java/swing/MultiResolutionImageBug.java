@@ -11,7 +11,7 @@ import java.net.URL;
 import java.util.Objects;
 
 /**
- * Reproducer for <a href="https://bugs.openjdk.org/browse/JDK-9075572">JDK bug 9075572</a>.
+ * Reproducer for <a href="https://bugs.openjdk.org/browse/JDK-8313698">JDK bug 8313698</a>.
  * <p>
  * Tested on:
  * <ul>
