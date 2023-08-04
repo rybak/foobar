@@ -68,9 +68,9 @@ public class MultiResolutionImageBug {
 			explanation = "Fixed resolution works fine.";
 		} else {
 			if (attemptsCounter == 1) {
-				explanation = "On Linux, on the first attempt, the Duke icon is shown.";
+				explanation = "On Linux, on the first attempt, the default icon (depends on vendor) is shown.";
 			} else {
-				explanation = "On subsequent attempts, the correct icon is shown.";
+				explanation = "On subsequent attempts, the correct (custom) icon is shown.";
 			}
 		}
 		JTextArea textDisplay = new JTextArea(explanation);
