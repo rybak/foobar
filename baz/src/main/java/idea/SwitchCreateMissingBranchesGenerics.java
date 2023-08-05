@@ -7,7 +7,7 @@ public class SwitchCreateMissingBranchesGenerics {
 		List<Example<String, Integer>> examples = List.of(
 				new Foo<>("hello", 10),
 				new Bar<>(),
-				new Foo<>("world", 42),
+				new Foo<>("world", "different C type"),
 				new Bar<>()
 		);
 
