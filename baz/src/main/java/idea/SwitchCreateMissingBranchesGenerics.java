@@ -37,7 +37,7 @@ public class SwitchCreateMissingBranchesGenerics {
 
 			// which after replacing the `null`s turns into:
 			String res = switch (example) {
-				case Foo<String, Integer, ?> foo -> "Foo of " + foo.getA() + " and " + foo.getC();
+				case Foo<String, Integer, ?> foo -> "Foo of " + foo.a() + " and " + foo.c();
 				case Bar<Integer> bar -> "a Bar: " + bar;
 			};
 			System.out.println(res);
@@ -47,22 +47,7 @@ public class SwitchCreateMissingBranchesGenerics {
 	sealed interface Example<A, B> permits Foo, Bar {
 	}
 
-	static final class Foo<A, B, C> implements Example<A, B> {
-		private final A a;
-		private final C c;
-
-		Foo(A a, C c) {
-			this.a = a;
-			this.c = c;
-		}
-
-		A getA() {
-			return a;
-		}
-
-		C getC() {
-			return c;
-		}
+	record Foo<A, B, C>(A a, C c) implements Example<A, B> {
 	}
 
 	static final class Bar<B> implements Example<String, B> {
