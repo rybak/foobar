@@ -21,15 +21,21 @@ public class SwitchCreateMissingBranchesGenerics {
 			 * 4. Select "Create missing branches:..."
 			 *
 			 * 5. Actual result:
-			 * 			String res = switch (example) {
-			 * 				case Foo foo -> null;
-			 * 				case Bar bar -> null;
-			 * 			};
+			 * 		String res = switch (example) {
+			 * 			case Foo foo -> null;
+			 * 			case Bar bar -> null;
+			 * 		};
 			 */
 
 			/*
 			 * Expected result with type parameters:
+			 * 		String res = switch (example) {
+			 * 			case Foo<String, Integer, ?> foo -> null;
+			 * 			case Bar<Integer> bar -> null;
+			 * 		};
 			 */
+
+			// which after replacing the `null`s turns into:
 			String res = switch (example) {
 				case Foo<String, Integer, ?> foo -> "Foo of " + foo.getA() + " and " + foo.getC();
 				case Bar<Integer> bar -> "a Bar: " + bar;
