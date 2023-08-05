@@ -5,9 +5,9 @@ import java.util.List;
 public class SwitchCreateMissingBranchesGenerics {
 	public static void main(String[] args) {
 		List<Example<String, Integer>> examples = List.of(
-				new Foo<>("hello", 10),
+				new Foo<String, Integer, Integer>("hello", 10),
 				new Bar<>(),
-				new Foo<>("world", "different C type"),
+				new Foo<String, Integer, String>("world", "different C type"),
 				new Bar<>()
 		);
 
