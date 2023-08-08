@@ -8,15 +8,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BaseMultiResolutionImage;
 import java.net.URL;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * Reproducer for <a href="https://bugs.openjdk.org/browse/JDK-8313698">JDK bug 8313698</a>.
+ * Reproducer for <a href="https://bugs.openjdk.org/browse/JDK-8313698">JDK bug 8313698: BaseMultiResolutionImage
+ * doesn't work as icon of java.awt.Window on Linux</a>.
  * <p>
  * Tested on:
  * <ul>
  *     <li>
- *         Linux:
+ *         KDE (with KWin) on Linux:
  *         <ul>
  *             <li>Java 11.0.19         ❌ Fail</li>
  *             <li>Java 17.0.7          ❌ Fail</li>
@@ -36,7 +38,24 @@ import java.util.Objects;
  *         macOS: not applicable, because JFrame's icons aren't rendered there.
  *         Instead, only {@link Taskbar#setIconImage} is rendered in the Dock.
  *     </li>
+ *     <li>
+ *         Probably any Linux desktop environment & window manager pair that includes icons in window decorations
+ *         is affected.
+ *     </li>
  * </ul>
+ * <p>
+ * Please note that the bug is about using {@link BaseMultiResolutionImage} that is comprised itself
+ * of images.
+ * When same images are passed into {@link Window#setIconImages(List)} as a {@link List}, without
+ * {@code BaseMultiResolutionImage}, then there is no bug.
+ * Not using {@code BaseMultiResolutionImage} is a workaround.
+ * </p>
+ * <p>
+ * I've only been able to reproduce the bug with images loaded from resources (see {@link #getFixedResolutionImage(String)})
+ * There is no bug, if {@link Image}s are generated on the fly, like what
+ * <a href="https://github.com/openjdk/jdk/blob/6864441163f946d0bec7380a2a120e31b812a6dc/test/jdk/java/awt/Window/WindowIconUpdateOnDPIChanging/WindowIconUpdateOnDPIChangingTest.java#L128-L147">WindowIconUpdateOnDPIChangingTest.java</a>
+ * does.
+ * </p>
  */
 public class MultiResolutionImageBug {
 	public static final String ICON_64 = "icon64x64.png";
@@ -59,7 +78,10 @@ public class MultiResolutionImageBug {
 		JDialog dialog = new JDialog(mainWindow, "Dialog attempt #" + attemptsCounter, Dialog.ModalityType.MODELESS);
 		dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		dialog.setIconImage(multi ? getMultiResolutionImage() : getFixedResolutionImage());
+		Image image = multi ? getMultiResolutionImage() : getFixedResolutionImage();
+		dialog.setIconImage(image);
+		// Same bug can be reproduced with:
+		// dialog.setIconImages(Collections.singletonList(image));
 
 		dialog.setLocation(200, 200);
 		dialog.setSize(400, 400);
@@ -109,8 +131,13 @@ public class MultiResolutionImageBug {
 
 	private Image getMultiResolutionImage() {
 		Image icon32 = getFixedResolutionImage(ICON_32);
-		Image icon64 = getFixedResolutionImage(ICON_64);
-		return new BaseMultiResolutionImage(icon32, icon64);
+		return new BaseMultiResolutionImage(icon32);
+		/*
+		 * Just one image in BaseMultiResolutionImage is enough to reproduce
+		 * the bug, but a more realistic use case is putting several images in:
+		 */
+		// Image icon64 = getFixedResolutionImage(ICON_64);
+		// return new BaseMultiResolutionImage(icon32, icon64);
 	}
 
 	private Image getFixedResolutionImage() {

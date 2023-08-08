@@ -36,11 +36,11 @@ public class SwitchCreateMissingBranchesGenerics {
 			 */
 
 			// which after replacing the `null`s turns into:
-			String res = switch (example) {
-				case Foo<String, Integer, ?> foo -> "Foo of " + foo.a() + " and " + foo.c();
-				case Bar<Integer> bar -> "a Bar: " + bar;
-			};
-			System.out.println(res);
+//			String res = switch (example) {
+//				case Foo<String, Integer, ?> foo -> "Foo of " + foo.a() + " and " + foo.c();
+//				case Bar<Integer> bar -> "a Bar: " + bar;
+//			};
+//			System.out.println(res);
 		}
 	}
 
