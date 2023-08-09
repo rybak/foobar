@@ -13,7 +13,7 @@ import java.util.Objects;
 
 /**
  * Reproducer for <a href="https://bugs.openjdk.org/browse/JDK-8313698">JDK bug 8313698: BaseMultiResolutionImage
- * doesn't work as icon of java.awt.Window on Linux</a>.
+ * doesn't work as icon of java.awt.Window in KDE (with KWin) on Linux.</a>.
  * <p>
  * Tested on:
  * <ul>
@@ -69,7 +69,7 @@ public class MultiResolutionImageBug {
 	}
 
 	/**
-	 * On Linux, first attempt always fails, because image isn't loaded yet,
+	 * In KDE on Linux, first attempt always fails, because image isn't loaded yet,
 	 * and {@code sun.awt.IconInfo#isValid} returns {@code false}.
 	 */
 	private void showDialog(JFrame mainWindow, boolean multi) {
@@ -90,7 +90,7 @@ public class MultiResolutionImageBug {
 			explanation = "Fixed resolution works fine.";
 		} else {
 			if (attemptsCounter == 1) {
-				explanation = "On Linux, on the first attempt, the default icon (depends on vendor) is shown.";
+				explanation = "In KDE on Linux, on the first attempt, the default icon (depends on vendor) is shown.";
 			} else {
 				explanation = "On subsequent attempts, the correct (custom) icon is shown.";
 			}
