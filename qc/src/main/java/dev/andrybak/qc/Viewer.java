@@ -140,7 +140,7 @@ public final class Viewer {
 	private void saveState() {
 		try {
 			Files.write(STATE_SAVE_PATH, history.serialize().stream().map(String::valueOf).collect(toList()));
-			System.out.println("Saved state.");
+			System.out.println("Saved state to " + STATE_SAVE_PATH.toAbsolutePath());
 		} catch (IOException e) {
 			System.err.println("Could not save current state in '" + STATE_SAVE_PATH + "'.");
 		}
