@@ -2,7 +2,7 @@ package dev.andrybak.qc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import dev.andrybak.qc.os.UrlOpener;
+import dev.andrybak.qc.os.Opener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -85,8 +85,10 @@ public final class Viewer {
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_H, 0), this::historyBack);
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_L, 0), this::historyForward);
 
-		// browser
+		// browser, 'o' for "Open"
 		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_O, 0), this::openCurrentInBrowser);
+		// 'e' for "file Explorer". Shortcut Meta+E opens file browsers both in Windows and in KDE.
+		initKeyStroke(KeyStroke.getKeyStroke(KeyEvent.VK_E, 0), this::openCurrentInFileBrowser);
 
 		config = Config.readConfig();
 		comicFiles = findAll(config);
@@ -313,7 +315,12 @@ public final class Viewer {
 
 	private void openCurrentInBrowser() {
 		String url = "https://questionablecontent.net/" + history.getCurrent();
-		UrlOpener.openUrl(url);
+		Opener.openUrl(url);
+	}
+
+	private void openCurrentInFileBrowser() {
+		Path p = comicFiles.get(history.getCurrent());
+		Opener.browseFileDirectory(window, p.toFile());
 	}
 
 	private void go() {
