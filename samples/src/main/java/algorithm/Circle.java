@@ -8,6 +8,11 @@ package algorithm;
  */
 public class Circle {
 	public static void main(String[] args) {
+
+
+		// x^2 + y^2 = r^2
+		// y = +- sqrt(r^2-x^2)
+
 		// Preparation
 		int radius = Integer.parseInt(args[0]);
 		int rasterSize = radius * 2 + 1;
@@ -31,7 +36,7 @@ public class Circle {
 		// Output
 		for (int i = 0; i < rasterSize; i++) {
 			for (int j = 0; j < rasterSize; j++) {
-				System.out.print(raster[i][j] ? "██" : "  ");
+				System.out.print(raster[i][j] ? "**" : "  ");
 			}
 			System.out.println();
 		}
