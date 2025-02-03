@@ -35,6 +35,9 @@ import java.util.function.Supplier;
  * The text in the window ("Hello font name = Open Sans Regular") is readable.
  * <h3>Actual result</h3>
  * The text in the window is unreadable with some kind of diagonal artifacts.
+ * <h3>Workaround</h3>
+ * Disable the Metal rendering pipeline by passing a system property
+ * {@code -Dsun.java2d.metal=false} or {@code -Dsun.java2d.opengl=true} to the JVM.
  * <h3>Notes</h3>
  * <p>
  * The checkboxes in the window help demonstrate that only {@link VolatileImage} with desktop rendering hints
