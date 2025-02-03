@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -40,8 +41,7 @@ import java.util.function.Supplier;
  * {@code -Dsun.java2d.metal=false} or {@code -Dsun.java2d.opengl=true} to the JVM.
  * <h3>Notes</h3>
  * <p>
- * The checkboxes in the window help demonstrate that only {@link VolatileImage} with desktop rendering hints
- * and with a TrueType font are affected.
+ * The controls in the window help demonstrate how different prerequisites are required.
  * <p>
  * Not reproducible on MS Windows. Reproduced on:
  * <ol>
@@ -82,23 +82,25 @@ public class MetalFontRenderingBug {
 		JCheckBox enableDesktopHints = new JCheckBox("Enable desktop hints", true);
 		JCheckBox enableVolatileImage = new JCheckBox("Enable volatile image", true);
 		JCheckBox enableOpenSans = new JCheckBox("Enable OpenSans-Regular.ttf", true);
+		JSpinner fontSizeSpinner = new JSpinner(new SpinnerNumberModel(28, 1, 96, 1));
 
-		contentPane.add(createCheckboxPanel(enableDesktopHints, enableVolatileImage, enableOpenSans),
+		contentPane.add(createControlsPanel(enableDesktopHints, enableVolatileImage, enableOpenSans, fontSizeSpinner),
 			BorderLayout.SOUTH);
 		contentPane.add(new JLabel("JLabel is not affected." +
 			" " + reportJvmVersion() +
 			" " + reportSystemProperty("sun.java2d.opengl") +
 			" " + reportSystemProperty("sun.java2d.metal")), BorderLayout.NORTH);
 		contentPane.add(new MyDrawStringExample(enableDesktopHints::isSelected, enableVolatileImage::isSelected,
-				enableOpenSans::isSelected),
+				enableOpenSans::isSelected, () -> (int) fontSizeSpinner.getValue()),
 			BorderLayout.CENTER);
-		ChangeListener checkboxListener = ignored -> {
+		ChangeListener controlsChangeListener = ignored -> {
 			demo.invalidate();
 			demo.repaint();
 		};
-		enableDesktopHints.addChangeListener(checkboxListener);
-		enableVolatileImage.addChangeListener(checkboxListener);
-		enableOpenSans.addChangeListener(checkboxListener);
+		enableDesktopHints.addChangeListener(controlsChangeListener);
+		enableVolatileImage.addChangeListener(controlsChangeListener);
+		enableOpenSans.addChangeListener(controlsChangeListener);
+		fontSizeSpinner.addChangeListener(controlsChangeListener);
 		demo.pack();
 		demo.setVisible(true);
 	}
@@ -111,10 +113,10 @@ public class MetalFontRenderingBug {
 		return "System property " + key + "=" + System.getProperty(key);
 	}
 
-	private static JPanel createCheckboxPanel(JCheckBox... checkBoxes) {
+	private static JPanel createControlsPanel(JComponent... components) {
 		JPanel panel = new JPanel();
-		for (JCheckBox checkBox : checkBoxes) {
-			panel.add(checkBox);
+		for (JComponent component : components) {
+			panel.add(component);
 		}
 		return panel;
 	}
@@ -126,9 +128,10 @@ public class MetalFontRenderingBug {
 		private final BooleanSupplier enableVolatileImage;
 		private final String fontName;
 		private final BooleanSupplier enableOpenSans;
+		private final IntSupplier fontSizeSupplier;
 
 		public MyDrawStringExample(BooleanSupplier enableDesktopHints, BooleanSupplier enableVolatileImage,
-			BooleanSupplier enableOpenSans)
+			BooleanSupplier enableOpenSans, IntSupplier fontSizeSupplier)
 			throws IOException, FontFormatException
 		{
 			InputStream openSansStream = MetalFontRenderingBug.class.getResourceAsStream(FONT_RESOURCE_PATH);
@@ -140,6 +143,7 @@ public class MetalFontRenderingBug {
 			this.enableDesktopHints = enableDesktopHints;
 			this.enableVolatileImage = enableVolatileImage;
 			this.enableOpenSans = enableOpenSans;
+			this.fontSizeSupplier = fontSizeSupplier;
 		}
 
 		@Override
@@ -167,7 +171,7 @@ public class MetalFontRenderingBug {
 			// "Courier" selected from https://en.wikipedia.org/wiki/List_of_typefaces_included_with_macOS
 			// as easy to distinguish from OpenSans
 			String chosenFontName = enableOpenSans.getAsBoolean() ? fontName : "Courier";
-			g2.setFont(new Font(chosenFontName, Font.PLAIN, 28));
+			g2.setFont(new Font(chosenFontName, Font.PLAIN, fontSizeSupplier.getAsInt()));
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			if (enableDesktopHints.getAsBoolean()) {
