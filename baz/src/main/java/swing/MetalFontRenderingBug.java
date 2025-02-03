@@ -159,6 +159,8 @@ public class MetalFontRenderingBug {
 
 		private void drawToBuffer(Supplier<Graphics2D> graphicsCreator) {
 			Graphics2D g2 = graphicsCreator.get();
+			// "Courier" selected from https://en.wikipedia.org/wiki/List_of_typefaces_included_with_macOS
+			// as easy to distinguish from OpenSans
 			String chosenFontName = enableOpenSans.getAsBoolean() ? fontName : "Courier";
 			g2.setFont(new Font(chosenFontName, Font.PLAIN, 28));
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
