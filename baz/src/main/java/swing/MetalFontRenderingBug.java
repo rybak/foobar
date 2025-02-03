@@ -66,8 +66,8 @@ import java.util.function.Supplier;
  * @author Andrei Rybak
  */
 public class MetalFontRenderingBug {
-	private static final int DEMO_WIDTH = 500;
-	private static final int DEMO_HEIGHT = 500;
+	private static final int DEMO_WIDTH = 800;
+	private static final int DEMO_HEIGHT = 600;
 
 	private MetalFontRenderingBug() {
 	}
@@ -79,16 +79,17 @@ public class MetalFontRenderingBug {
 		JPanel contentPane = new JPanel(new BorderLayout());
 		demo.setContentPane(contentPane);
 
-		JCheckBox enableDesktopHints = new JCheckBox("Enable desktop hints");
-		enableDesktopHints.setSelected(true);
-		JCheckBox enableVolatileImage = new JCheckBox("Enable volatile image");
-		enableVolatileImage.setSelected(true);
+		JCheckBox enableDesktopHints = new JCheckBox("Enable desktop hints", true);
+		JCheckBox enableVolatileImage = new JCheckBox("Enable volatile image", true);
+		JCheckBox enableOpenSans = new JCheckBox("Enable OpenSans-Regular.ttf", true);
 
-		contentPane.add(createCheckboxPanel(enableDesktopHints, enableVolatileImage), BorderLayout.SOUTH);
+		contentPane.add(createCheckboxPanel(enableDesktopHints, enableVolatileImage, enableOpenSans),
+			BorderLayout.SOUTH);
 		contentPane.add(new JLabel("JLabel is not affected." +
 			" " + reportSystemProperty("sun.java2d.opengl") +
 			" " + reportSystemProperty("sun.java2d.metal")), BorderLayout.NORTH);
-		contentPane.add(new MyDrawStringExample(enableDesktopHints::isSelected, enableVolatileImage::isSelected),
+		contentPane.add(new MyDrawStringExample(enableDesktopHints::isSelected, enableVolatileImage::isSelected,
+				enableOpenSans::isSelected),
 			BorderLayout.CENTER);
 		ChangeListener checkboxListener = ignored -> {
 			demo.invalidate();
@@ -96,6 +97,7 @@ public class MetalFontRenderingBug {
 		};
 		enableDesktopHints.addChangeListener(checkboxListener);
 		enableVolatileImage.addChangeListener(checkboxListener);
+		enableOpenSans.addChangeListener(checkboxListener);
 		demo.pack();
 		demo.setVisible(true);
 	}
@@ -104,11 +106,12 @@ public class MetalFontRenderingBug {
 		return "System property " + key + "=" + System.getProperty(key);
 	}
 
-	private static JPanel createCheckboxPanel(JCheckBox enableDesktopHints, JCheckBox enableVolatileImage) {
-		JPanel checkboxes = new JPanel();
-		checkboxes.add(enableDesktopHints);
-		checkboxes.add(enableVolatileImage);
-		return checkboxes;
+	private static JPanel createCheckboxPanel(JCheckBox... checkBoxes) {
+		JPanel panel = new JPanel();
+		for (JCheckBox checkBox : checkBoxes) {
+			panel.add(checkBox);
+		}
+		return panel;
 	}
 
 	private static class MyDrawStringExample extends JComponent {
@@ -117,8 +120,10 @@ public class MetalFontRenderingBug {
 		private final BooleanSupplier enableDesktopHints;
 		private final BooleanSupplier enableVolatileImage;
 		private final String fontName;
+		private final BooleanSupplier enableOpenSans;
 
-		public MyDrawStringExample(BooleanSupplier enableDesktopHints, BooleanSupplier enableVolatileImage)
+		public MyDrawStringExample(BooleanSupplier enableDesktopHints, BooleanSupplier enableVolatileImage,
+			BooleanSupplier enableOpenSans)
 			throws IOException, FontFormatException
 		{
 			InputStream openSansStream = MetalFontRenderingBug.class.getResourceAsStream(FONT_RESOURCE_PATH);
@@ -129,6 +134,7 @@ public class MetalFontRenderingBug {
 			System.out.println("Registered font: " + font);
 			this.enableDesktopHints = enableDesktopHints;
 			this.enableVolatileImage = enableVolatileImage;
+			this.enableOpenSans = enableOpenSans;
 		}
 
 		@Override
@@ -153,7 +159,8 @@ public class MetalFontRenderingBug {
 
 		private void drawToBuffer(Supplier<Graphics2D> graphicsCreator) {
 			Graphics2D g2 = graphicsCreator.get();
-			g2.setFont(new Font(fontName, Font.PLAIN, 14));
+			String chosenFontName = enableOpenSans.getAsBoolean() ? fontName : "Courier";
+			g2.setFont(new Font(chosenFontName, Font.PLAIN, 28));
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			if (enableDesktopHints.getAsBoolean()) {
@@ -163,7 +170,7 @@ public class MetalFontRenderingBug {
 				if (hints != null)
 					g2.addRenderingHints(hints);
 			}
-			g2.drawString("Hello font name = " + fontName, 20, 20);
+			g2.drawString("Hello. Font name = " + chosenFontName, 20, 50);
 			g2.dispose();
 		}
 	}
