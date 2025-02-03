@@ -83,9 +83,10 @@ public class MetalFontRenderingBug {
 		JCheckBox enableDesktopHints = new JCheckBox("Enable desktop hints", true);
 		JCheckBox enableVolatileImage = new JCheckBox("Enable volatile image", true);
 		JCheckBox enableOpenSans = new JCheckBox("Enable OpenSans-Regular.ttf", true);
-		JSpinner fontSizeSpinner = new JSpinner(new SpinnerNumberModel(28, 1, 96, 1));
+		JSpinner fontSizeSpinner = new JSpinner(new SpinnerNumberModel(50, 1, 96, 1));
 
-		contentPane.add(createControlsPanel(enableDesktopHints, enableVolatileImage, enableOpenSans, fontSizeSpinner),
+		contentPane.add(createControlsPanel(enableDesktopHints, enableVolatileImage, enableOpenSans,
+				new JLabel("Font size: "), fontSizeSpinner),
 			BorderLayout.SOUTH);
 		contentPane.add(new JLabel("JLabel is not affected." +
 			" " + reportJvmVersion() +
@@ -153,13 +154,14 @@ public class MetalFontRenderingBug {
 			Graphics2D g2 = (Graphics2D) g.create();
 			GraphicsConfiguration deviceConfiguration = g2.getDeviceConfiguration();
 			Image image;
+			Rectangle bounds = g2.getClipBounds();
 			if (enableVolatileImage.getAsBoolean()) {
 				VolatileImage compatibleVolatileImage =
-					deviceConfiguration.createCompatibleVolatileImage(DEMO_WIDTH, DEMO_HEIGHT);
+					deviceConfiguration.createCompatibleVolatileImage(bounds.width, bounds.height);
 				drawToBuffer(compatibleVolatileImage::createGraphics);
 				image = compatibleVolatileImage;
 			} else {
-				BufferedImage bufferedImage = deviceConfiguration.createCompatibleImage(DEMO_WIDTH, DEMO_HEIGHT);
+				BufferedImage bufferedImage = deviceConfiguration.createCompatibleImage(bounds.width, bounds.height);
 				drawToBuffer(bufferedImage::createGraphics);
 				image = bufferedImage;
 			}
@@ -172,7 +174,8 @@ public class MetalFontRenderingBug {
 			// "Courier" selected from https://en.wikipedia.org/wiki/List_of_typefaces_included_with_macOS
 			// as easy to distinguish from OpenSans
 			String chosenFontName = enableOpenSans.getAsBoolean() ? fontName : "Courier";
-			g2.setFont(new Font(chosenFontName, Font.PLAIN, fontSizeSupplier.getAsInt()));
+			Font font = new Font(chosenFontName, Font.PLAIN, fontSizeSupplier.getAsInt());
+			g2.setFont(font);
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 			if (enableDesktopHints.getAsBoolean()) {
@@ -182,7 +185,7 @@ public class MetalFontRenderingBug {
 				if (hints != null)
 					g2.addRenderingHints(hints);
 			}
-			g2.drawString("Hello. Font name = " + chosenFontName, 20, 50);
+			g2.drawString("Font: " + font.getName() + ", size: " + font.getSize(), 20, 50);
 			g2.dispose();
 		}
 	}
