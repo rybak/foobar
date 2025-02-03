@@ -41,7 +41,7 @@ import java.util.function.Supplier;
  * <h3>Notes</h3>
  * <p>
  * The checkboxes in the window help demonstrate that only {@link VolatileImage} with desktop rendering hints
- * are affected.
+ * and with a TrueType font are affected.
  * <p>
  * Not reproducible on MS Windows. Reproduced on:
  * <ol>
