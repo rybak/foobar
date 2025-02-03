@@ -26,6 +26,7 @@ import java.util.function.Supplier;
  *     <li>A TrueType font is used. In this reproducer, the file {@code OpenSans-Regular.ttf} downloaded from
  *     <a href="https://fonts.google.com/specimen/Open+Sans">Google Fonts</a> is used.
  *     </li>
+ *     <li>Font size is less than 51.</li>
  * </ol>
  * <h3>Steps to reproduce</h3>
  * <ol>
