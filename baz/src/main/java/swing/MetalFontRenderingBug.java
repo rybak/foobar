@@ -43,7 +43,7 @@ import java.util.function.Supplier;
  * The checkboxes in the window help demonstrate that only {@link VolatileImage} with desktop rendering hints
  * are affected.
  * <p>
- * Reproduced on:
+ * Not reproducible on MS Windows. Reproduced on:
  * <ol>
  *     <li>zulu17.48.15-ca-jdk17.0.0-macosx_aarch64 with {@code -Dsun.java2d.metal=true}</li>
  *     <li>temurin17.0.13+11 aarch64 (aka {@code OpenJDK17U-jdk_aarch64_mac_hotspot_17.0.13_11})
