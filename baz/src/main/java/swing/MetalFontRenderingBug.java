@@ -86,6 +86,7 @@ public class MetalFontRenderingBug {
 		contentPane.add(createCheckboxPanel(enableDesktopHints, enableVolatileImage, enableOpenSans),
 			BorderLayout.SOUTH);
 		contentPane.add(new JLabel("JLabel is not affected." +
+			" " + reportJvmVersion() +
 			" " + reportSystemProperty("sun.java2d.opengl") +
 			" " + reportSystemProperty("sun.java2d.metal")), BorderLayout.NORTH);
 		contentPane.add(new MyDrawStringExample(enableDesktopHints::isSelected, enableVolatileImage::isSelected,
@@ -100,6 +101,10 @@ public class MetalFontRenderingBug {
 		enableOpenSans.addChangeListener(checkboxListener);
 		demo.pack();
 		demo.setVisible(true);
+	}
+
+	private static String reportJvmVersion() {
+		return "JVM version = " + Runtime.version();
 	}
 
 	private static String reportSystemProperty(String key) {
