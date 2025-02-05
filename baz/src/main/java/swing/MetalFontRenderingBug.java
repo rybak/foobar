@@ -14,6 +14,8 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 /**
+ * This reproducer can also be found <a href="https://github.com/rybak/foobar/blob/master/baz/src/main/java/swing/MetalFontRenderingBug.java">
+ * on GitHub</a> with the needed resource files.
  * <h2>Bug: some TrueType fonts are rendered incorrectly in VolatileImage in the Metal rendering pipeline.</h2>
  * <h3>Prerequisites</h3>
  * Requirements for the bug reproduction:
