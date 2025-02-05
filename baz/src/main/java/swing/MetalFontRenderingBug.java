@@ -36,7 +36,7 @@ import java.util.function.Supplier;
  *     <li>Observe the text in the demo's window</li>
  * </ol>
  * <h3>Expected result</h3>
- * The text in the window ("Hello font name = Open Sans Regular") is readable.
+ * The text in the window ("Font: Open Sans Regular, size: 50") is readable.
  * <h3>Actual result</h3>
  * The text in the window is unreadable with some kind of diagonal artifacts.
  * <h3>Workaround</h3>
